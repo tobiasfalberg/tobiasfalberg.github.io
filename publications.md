@@ -4,5 +4,6 @@ title: Veröffentlichungen
 permalink: /publications/
 ---
 
-## 2025
-- Beispiel Veröffentlichung
+Wir singen das Wort Kerosin, Bild-Text-Gedichte, Edition Blumen
+Plastiniertes Gelände, Gedichte, Edition Art Science
+Landschaft mit Ufo, Kurzgeschichten, Ursus Verlag
