@@ -1,0 +1,125 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Textris</title>
+
+<style>
+body{
+  background:#050505;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+  font-family:monospace;
+}
+
+#title{
+  color:#66ffcc;
+  font-size:26px;
+  margin-bottom:10px;
+  transition:0.5s;
+}
+
+.explode{
+  color:red !important;
+  transform:scale(1.5);
+  letter-spacing:8px;
+}
+
+#hud{
+  position:fixed;
+  top:10px;
+  left:15px;
+  color:#66ffcc;
+}
+
+#inputBox{
+  position:fixed;
+  top:110px;
+  left:15px;
+  color:#66ffcc;
+}
+
+textarea{
+  width:260px;
+  height:70px;
+  background:#111;
+  color:#eee;
+}
+
+#startBtn{margin-top:6px;}
+#clearBtn{position:fixed; bottom:20px; right:20px;}
+
+#copyright{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  color:#666;
+  font-size:12px;
+}
+
+#grid{
+  display:grid;
+  grid-template-columns:repeat(13,22px);
+  grid-template-rows:repeat(26,22px);
+}
+
+.cell{
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:#444;
+}
+
+.word{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+}
+
+.frozen{outline:1px solid rgba(255,255,255,0.3);}
+
+.w0{background:#1e3a5f;}
+.w1{background:#2a5f3a;}
+.w2{background:#5f2a2a;}
+.w3{background:#4a2a5f;}
+.w4{background:#5f4a2a;}
+.w5{background:#2a5f5f;}
+</style>
+</head>
+
+<body>
+
+<div id="title">Textris</div>
+
+<div id="hud">Wörter:0<br>Schübe:0<br>Zeit:0.0s<br>Level:0</div>
+
+<div id="inputBox">
+<div>Textverwertung oder Start</div>
+<textarea id="userWords"></textarea><br>
+<button id="startBtn" onclick="start()">Start</button>
+</div>
+
+<button id="clearBtn" onclick="init()">Clear</button>
+<div id="copyright">© Tobias Falberg</div>
+
+<div id="grid"></div>
+
+<script>
+/* Dein gesamter JS-Code aus deinem Snippet hier einfügen */
+</script>
+
+</body>
+</html>
