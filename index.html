@@ -55,9 +55,18 @@ nav a:hover {
 }
 
 .explode {
-  color:red !important;
-  transform:scale(1.5);
-  letter-spacing:8px;
+  color: red !important;
+  animation: explodeAnim 1s ease-out forwards;
+  font-weight: bold;
+  letter-spacing: 6px;
+}
+
+@keyframes explodeAnim {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.8); opacity: 1; }
+  50% { transform: scale(2); opacity: 0.9; }
+  70% { transform: scale(1.9); opacity: 1; }
+  100% { transform: scale(2); opacity: 1; }
 }
 
 #hud {
@@ -155,8 +164,7 @@ textarea {
 
   <!-- ================= SPIEL SCRIPT ================= -->
   <script>
-const rawText = `lesesaal pariser platz bleistift der akademie künste ...`; // wie bisher
-
+const rawText = `... dein kompletter Text ...`; // wie in Code 13
 let baseWords = Array.from(new Set(
   rawText.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2)
 ));
@@ -210,19 +218,12 @@ function check(x,y,dx,dy){let str="",pos=[];for(let i=0;i<10;i++){let cx=x+dx*i,
 
 function shouldFreeze(w){for(let [x,y] of w.positions){if(y===H-1) return true; let below=grid[y+1]?.[x]; if(below?.word && below.word.frozen) return true;} return false;}
 function move(){if(!running) return; pushCount++; updateHUD(); beep(); for(let w of words){if(w.frozen) continue; if(shouldFreeze(w)){w.frozen=true; ding(); continue;} w.positions.forEach(([x,y])=>{if(grid[y][x].word===w){grid[y][x]={char:randLetter(),word:null};}}); w.positions=w.positions.map(([x,y])=>[x,y+1]); w.positions.forEach(([x,y],i)=>{grid[y][x]={char:w.letters[i],word:w};});} checkEnd();}
-function checkEnd(){
-  let gameOver=false;
-  for(let x=0;x<W;x++){
-    let c=grid[0][x];
-    if(c.word && c.word.frozen){gameOver=true; break;}
-  }
-  if(gameOver){
-    running=false;
-    document.getElementById("title").classList.add("explode");
-    document.getElementById("hud").innerHTML=document.getElementById("hud").innerHTML.replace(/Level:\d+/,'Level:26');
-    finale();
-  }
-}
+function checkEnd(){let gameOver=false; for(let x=0;x<W;x++){let c=grid[0][x]; if(c.word && c.word.frozen){gameOver=true; break;}} if(gameOver){
+  running=false;
+  document.getElementById("title").classList.add("explode");
+  document.getElementById("hud").innerHTML=document.getElementById("hud").innerHTML.replace(/Level:\d+/,'Level:26');
+  finale();
+}}
 function speed(){if(pushCount>=400) return 1000; if(pushCount>=300) return 2000; if(pushCount>=200) return 3000; if(pushCount>=100) return 4000; return 5000;}
 function scheduleMove(){if(!running) return; setTimeout(()=>{move(); scheduleMove();},speed());}
 function step(){if(!running) return; for(let y=0;y<H;y++){for(let x=0;x<W;x++){if(!grid[y][x].word && Math.random()<0.02){grid[y][x].char=randLetter();}}} scan(); updateHUD(); render();}
