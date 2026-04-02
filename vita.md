@@ -4,8 +4,8 @@ title: Vita
 permalink: /vita/
 ---
 
-## Herkunft
-- Lutherstadt Wittenberg
+Herkunft:
+Lutherstadt Wittenberg
 
-## Aufenthalt
-- Nürnberg
+Aufenthalt:
+Nürnberg
