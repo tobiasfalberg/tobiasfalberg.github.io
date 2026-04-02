@@ -1,6 +1,6 @@
 ---
 layout: home
-title: Start
+title: Textris
 ---
 
 # Hallo Welt
