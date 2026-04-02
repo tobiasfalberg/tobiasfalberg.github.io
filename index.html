@@ -1,148 +1,291 @@
+---
+layout: null
+title: Textris
+permalink: /
+---
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Basiswortliste Seite</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      padding: 20px;
-      background-color: #f4f4f4;
-      color: #333;
-    }
-    h1 {
-      color: #444;
-    }
-    pre {
-      background: #fff;
-      padding: 10px;
-      border: 1px solid #ddd;
-      overflow-x: auto;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Textris</title>
+<style>
+/* ================= GLOBAL ================= */
+body {
+  background:#050505;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  height:100vh;
+  font-family: monospace;
+  color:#66ffcc;
+}
+
+/* ================= NAVIGATION ================= */
+nav {
+  width: 100%;
+  background: #111;
+  padding: 10px;
+  display: flex;
+  gap: 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+nav a {
+  color: #66ffcc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #fff;
+}
+
+/* ================= HUD & TITLE ================= */
+#title {
+  color:#66ffcc;
+  font-size:26px;
+  margin:70px 0 10px 0; /* Platz für Navigation */
+  transition:0.5s;
+}
+
+.explode {
+  color:red !important;
+  transform:scale(1.5);
+  letter-spacing:8px;
+}
+
+#hud {
+  position:fixed;
+  top:50px;
+  left:15px;
+  color:#66ffcc;
+}
+
+#inputBox {
+  position:fixed;
+  top:110px;
+  left:15px;
+  color:#66ffcc;
+}
+
+textarea {
+  width:260px;
+  height:70px;
+  background:#111;
+  color:#eee;
+}
+
+#startBtn {margin-top:6px;}
+#clearBtn {position:fixed; bottom:20px; right:20px;}
+
+#copyright {
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  color:#666;
+  font-size:12px;
+}
+
+/* ================= GRID ================= */
+#grid {
+  display:grid;
+  grid-template-columns:repeat(13,22px);
+  grid-template-rows:repeat(26,22px);
+  margin-top: 200px;
+}
+
+.cell {
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:#444;
+}
+
+.word {
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+}
+
+.frozen {outline:1px solid rgba(255,255,255,0.3);}
+
+.w0{background:#1e3a5f;}
+.w1{background:#2a5f3a;}
+.w2{background:#5f2a2a;}
+.w3{background:#4a2a5f;}
+.w4{background:#5f4a2a;}
+.w5{background:#2a5f5f;}
+</style>
 </head>
+
 <body>
-  <h1>Basiswortliste</h1>
-  <p>Dies ist die aktuelle Basiswortliste mit allen bisherigen und neuen Wörtern:</p>
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="/">Textris</a>
+    <a href="/about/">Über mich</a>
+    <a href="/publications/">Veröffentlichungen</a>
+    <a href="/vita/">Vita</a>
+  </nav>
 
-  <pre id="wortliste-container"></pre>
+  <!-- SPIEL -->
+  <div id="title">Textris</div>
+  <div id="hud">Wörter:0<br>Schübe:0<br>Zeit:0.0s<br>Level:0</div>
 
+  <div id="inputBox">
+    <div>Textverwertung oder Start</div>
+    <textarea id="userWords"></textarea><br>
+    <button id="startBtn" onclick="start()">Start</button>
+  </div>
+
+  <button id="clearBtn" onclick="init()">Clear</button>
+  <div id="copyright">© Tobias Falberg</div>
+  <div id="grid"></div>
+
+  <!-- ================= SPIEL SCRIPT ================= -->
   <script>
-    const basiswortliste = [
-      "die","moskwa","ist","der","stolz","truppe","thront","mächtig","auf",
-      "meeren","führt","unbesiegbaren","in","schwierigkeiten","getroffen","und",
-      "sinkt","gesunken","hatte","einen","munitionsvorfall","sturm","seenot",
-      "geraten","fährt","aber","zum","hafen","zurück","nicht","mehr","zu",
-      "sehen","es","gab","nie","schiff","das","heiße","gibt","kein","meer",
-      "keinen","krieg","toten","was","überhaupt","ein","erklärung","ihn",
-      "meine","zwölf","nerven","überschneiden","sich","körperpunkt","genau",
-      "dort","sticht","er","hinein","stößt","dreht","oft","bin","ich","so",
-      "traurig","dass","selbst","weinen","mir","schwerfällt","rückstrom","herz",
-      "tritt","bewusstlosigkeit","operationsbesteck","noch","deutlich","spürt",
-      "dann","erzeugt","mich","neu","als","sonnengeflecht","knospe","aller",
-      "denkbaren","knospen","aufflammen","schnell","immer","schneller","flächenbrand",
-      "sonne","wandert","richtung","zenit","wir","folgen","ihr","bis","unsere",
-      "haut","schält","im","schatten","riecht","harzig","breitet","bett","nadeln",
-      "aus","dem","kompass","herausführt","mit","rauchfäden","vernähen","süntelgestalt",
-      "radieren","kupfer","diesem","glühenden","wald","antennen","am","anfang","war",
-      "anlage","blaue","tannen","wo","pfad","verliert","vorwärts","ritzen","leicht",
-      "stechen","zurückweiche","verharre","werden","angriffe","zärtlich","auch",
-      "langsames","eindringen","bleibt","kanülen","setzen","fest","richten","herzstrom",
-      "grad","wisperndes","hindernis","muss","wenden","finden","kippe","stelle","mooshügel",
-      "scharf","kleinen","system","schreibt","protokoll","wolken","vom","glasschmelz",
-      "silbergras","ins","heidekraut","legen","langsam","beschlagen","wenn","abkühlt",
-      "nacht","vollmond","heranzoomen","kratern","laufen","wellige","strahlen","hell",
-      "verbundene","nervenzellen","denen","tagreste","flackern","würde","objektiv","wesen",
-      "träumen","strich","sterne","erdrotation","geschriebenes","licht","nah","stehen",
-      "struktur","abgetrennt","treiben","erfasse","blanke","gewalt","gedankens","gestalt",
-      "wort","für","dich","umgibt","ort","bleiben","gotisches","gebilde","aufwachen",
-      "steigen","stachlige","minen","mundstücke","knapp","oberfläche","überlauf","bewegung",
-      "uns","zurückfließt","unter","bauchdecke","wächst","neuland","schneidegras",
-      "ameisenstraßen","fluten","zieht","zusammen","geriffelter","pfirsichkern","voll",
-      "verdichteter","möglichkeiten","gärten","üa","ausflug","nach","entkleidet","poliert",
-      "anlauf","rasensohlen","heißen","steinen","drängend-empfängliche","wasser","dürfen",
-      "freien","lauf","lassen","denkinseln","von","mohn","umgürtet","untergangsrot",
-      "körper","flimmern","beckenrand","gehirn","vielen","gehirnen","einander","anstacheln",
-      "gerangel","aufspritzen","apfelaromen","machen","süchtig","vereinen","warteschlangen",
-      "trance","da","türmen","blitzt","regen","platzt","herunter","quellende","gewitterwände",
-      "wischen","menschen","gelände","foto","sie","sitzt","vor","ihrem","macbook","wegen",
-      "hitze","nackt","vorgebeugt","sphinx","satten","schenkeln","zwei","apfelbrüsten",
-      "zwischen","angewinkelten","armen","hätte","gern","fotografiert","sage","kannst",
-      "deiner","memory","antwortet","notiere","art","bauchfüßer","tagebaustellen","love",
-      "dart","schießen","kalkpfeile","jetzt","unserer","fußsohlen","formst","traumwelten",
-      "betrachtend","kapseln","sprache","absorbieren","gehäuse","paare","wohnen","darinnen",
-      "kinder","schauen","verwandlung","zeitlupe","jahre","beschleunigt","hände","werfen",
-      "draußen","ablaufende","puzzle","neue","oberflächen","halt","suchen","übergänge",
-      "fahren","augen","moospflanzen","riesig","liebesleben","abfolge","kunstvoller","formen",
-      "mikroskopisch","groß","blaufilter","äste","überlagern","frühling","sitzen","gesicht",
-      "trichter","absolut","tun","farbe","rot","versuch","scharfem","küchenmesser","haselnuss",
-      "schale","spalten","haltestelle","frau","ahmt","taube","gurrt","wintereinbruch","hausmeister",
-      "schiebt","schnee","kreis","begegnung","tod","kommt","erst","lächeln","gesehn","heute",
-      "trauermeldung","lockdown","wand","isst","satt","insassen","fallen","livestream","koma",
-      "volksvertreter","politik","reinlich","reicht","hand","wäscht","volkswirtschaftslehre",
-      "letzten","nur","weniger","geld","überholspur","alles","allem","furchtbar","vorbeigezogen",
-      "kommen","gehen","poeten","wegs","reimen","singen","gehn","keks","kernzone","landen",
-      "tief","lange","nebenher","rückt","heran","hochschauen","stürzen","räumlichkeit","bäume",
-      "bach","verschluckt","brennnesseln","sägeblätter","wege","falter","eichenhand","eier",
-      "gelegt","platine","planeten","horizont","kraftwerk","zapft","orbit","himmel","brennt",
-      "schwarzer","silhouette","quecksilberwolken","schon","mond","speicher","kühlere","kopanina-konnektion",
-      "zugeeignet","tanne","schlucken","beginnend","spitze","mund","stülpen","kleid","stamm",
-      "umrundet","kraft","kiefer","testen","fassen","holz","krachen","würden","knochen","brechen",
-      "frische","harz","trägt","zapfen","aromen","unkontrollierbarer","einsehen","schichten",
-      "ablichten","gasball","umschließen","retina","stirn","tiegel","energie","stille","vogelsang",
-      "blätterrauschen","tauschen","blicke","endlosen","feld","heulinien","verjüngen","strommasten",
-      "verschwinden","betrachter","nimmt","kehren","iris","verjüngende","linien","heu","navigationsgeräte",
-      "vögel","gewitter","warten","abfahrten","weggabelungen","niemanden","jedes","essen","treffen",
-      "personen","danach","vielleicht","moment","nächsten","profilen","wendungen","straße","worten",
-      "beschrieben","jahrzehnte","auftauchen","verstreichen","siedlungen","grundrisse","unmerkliche",
-      "erhebungen","waldboden","einmal","wohnung","anders","kopf","durch","wände","verzweigte","fenster",
-      "umdrehn","grünen","schlafzimmer","wegatmen","wehen","gefühl","lungen","weit","äußerste","blau",
-      "wolkengestalt","luft","anhalten","fernes","haupt","überland","leitungen","mast","megafone",
-      "blinkenden","kontrollkästen","messgeräte","örtliche","zukunft","vorhersagen","friedlich","grün",
-      "rotgolden","weiß","hügel","kurvenspiegel","leer","beiden","richtungen","namen","gasthäuser",
-      "übermalt","grauem","grau","darüber","wind","gräserweiten","davor","austrinken","welle","wellen",
-      "leeren","hin","winken","ufer","boote","bojen","gesichter","badenden","kaum","erkennen",
-      "erfrischend","unbestimmt","tag","geschieht","kalender","vermerkt","landschaft","gedicht",
-      "wählt","grenze","schritt","fingerhut","bienen","windhaut","lidschlag","öffnet","nahe","kirche",
-      "rand","friedhofs","kriegerdenkmal","daneben","winterlinde","gestärkt","gebeinen","blättern",
-      "blüten","bienenvölkern","einzugsgebiet","hier","ruhen","krone","versammelt","baumes","mächtiger",
-      "summen","anhebt","jahresringe","umlaufbahnen","wolkenzuzug","stiehlt","wärme","gekauerten",
-      "gruppe","teich","spiegelt","veränderung","plötzlich","schneeweiß","auslöschung","mittendrin",
-      "kollidierenden","köpfen","verdichter","gemeinsamen","sicherheiten","entfernen","wortgebäuden",
-      "schneidemaschinen","kreisen","häufen","stroh","gold","gesponnen","blonder","dezember",
-      "durchstreife","stadt","schließt","asketisches","blondem","wolkenatem","blaues","schneidewerkzeug",
-      "organigramms","tut","gut","ergeben","abschied","laufsteinen","fluss","waren","früher","dunkeln",
-      "wer","morgen","umgehen","zeugung","nachwehen","kettensteg","gekettet","steinblöcke","eisengelenke",
-      "steg","überbrückt","wirbel","pfahlspitzen","will","münden","scheinheilige","blässe","3x3x3",
-      "also","beispiel","jeweils","drei","wörter","zeile","zeilen","trennt","absatz","strophe","dritte",
-      "löst","eingebauten","mechanismus","erscheinung","erlen","samen","verbreiten","kunstvollen",
-      "hölzernen","schreinen","schmalen","einsatz","riesenleiter","weißen","handschuhen","dachterrasse",
-      "nest","abhören","formatieren","chip","austauschen","weißer","kittel","wirkt","offiziell","boden",
-      "liegen","kinderbett","trocken","weiter","vierzig","eiserne","stufen","mitternacht","erdferne",
-      "stimme","stirnrand","dagegen","traum","gitter","glühende","drähte","gesperrte","ruhe","klareren",
-      "würfel","quellwasser","wolke","aquarium","gott","milch","gießt","kirchenkuppel","drückt","goldener",
-      "brustspitze","mull","gedämpftes","innenraum","stolpersteine","eingraviertem","sprang","balkon",
-      "klarem","wetter","baumriesen","mauern","gefächerten","mitte","passagiere","hohe","gleißt","grellem",
-      "tiefem","helles","schiefergrau","wasserkörper","schwebt","drängt","masse","lichtflut","blendet",
-      "gegenteil","ineinander","vorbei","welt","offen","festlegen","dauerhafte","wahrheit","existieren",
-      "zustände","zugleich","gegensätze","zeitgleich","verschiedenen","wahres","berechnet","flächen",
-      "routen","falsch","nahtlos","eisenhut","vorm","hydrant","einflugschneise","bauen","wespen","verlassen",
-      "wechseln","jede","stich","überm","hang","durchkreuzen","flugzeuge","hoffnung","entsteht","stehenden",
-      "dingen","hydras","blüht","aufschichten","knistert","tänzerins","reise","befreite","weiten",
-      "glaswände","pools","steiler","palmbäume","abendrot","adern","ranken","nachtwärts","fruchtfleisch",
-      "gewürze","betäubte","körper","lichtstrahl","betten","strömende","fläche","lippen","nackter",
-      "horizonte","schiebenden","steigenden","doch","tänzerin","blickt","entzündet","ziehend","tabak",
-      "gerollte","zeit","zuhause","denkt","rhythmus","endet","gerade","starb","vater","viel","früh",
-      "gebildet","reich","trank","grab","hinein","obwohl","stiefmutter","auszahlen","vermieten","kamera",
-      "biegt","züngelt","entfaltet","schwarzem","fürchte","gedichte","schützen","ureigenen","raumzeit",
-      "pflanzen","fort","expandiert","dehnt","hülle","schleudert","wellen","zerreißt","umschließt",
-      "konzentrischen","kreisen"
-    ];
+const rawText = `
+lesesaal pariser platz bleistift der akademie künste schreib brunnen fontänen brandenburger tor
+locken spanischer touristinnen hinter glas hitze hochdruckgebiet bald ausgehoben von einer front
+kaltluft sturmwarnung hagel hier drin sind fotos nicht erlaubt zuckendes lid leiterin ihres hellen
+gesichts gerötete wangen ihrer schönen augen eisgrau greift klimaanlage fußfesseln hals während
+hilbig sich entziffert vers vergangenheit bereitstellt bilder leben wiedergeben egon schieles bäume
+letzte zeilen seiner sterbenden frau über liebe zu ihm ins abnorme wächst je näher tod hand reichen
+liebreiz erahnen intimes detail tür öffnen aufgehen im tiergarten sturm erwarten mit einem beschriebenen
+stück papier schwebebalken sommer staucht gebäude jede bewegung hält als hohlform zurückfließt
+abenddämmer wir schneiden melone harsch kristallin zuckrige dachzimmerwinkel du liegst schon ich
+greife deine hände dringe ein halbschlaf ungeschütztes gebiet steige über fenster firste hinaus
+rücklings treiben blaugeflügelten prachtlibelle stotternder flug bewusstseinsstrom neben anstalt
+entlang bist ganz bei nur und dieses blau gewichtslos schwebe teilchen großen alles ausfüllenden
+äthers stell dir dies vor als schwimmbad dein blick verlinkt tiefe im ohr eine art stille fusion
+fabrikhallen hallen an metall wasserkante wanderndes gelenk erinnernder ton aus anderen bewusstsein
+schwalbe teilt kopf nach gehoben kehrt geschrei zurück lachen explosion mit anlauf diesen zustand
+springenden kindes grenzzustand am rand niemandsland ablegen zerpflückte namen unterholz übergehen
+kälteschlaf granatäpfel rot eingeschlossene geschosse würden schweben verzinkten zweigen schnee
+beeren beinerne einsprengsel weiche flocken verputz fall angehalten unwirklich weiß wund eisengrauem
+hintergrund bänder flechten herbst färbt eichelhälften legt spur unserer zusammentreffen unsere
+brustkörbe bestückt irrlichtern anderen warnen du kopftier durchsterntes gesicht körper gewordenen
+datenflüssen lese aus deinen härchen jedes gen mal anders nierenäste knüpfe bunte gebete trägst
+holzfarbe pappelgeruch schließt winterschlaf ost tage vorher wechselten tage geschmack nächte
+landeten häuften erwartung bis dämmer uns freischleppte mutter sang schon zimmer füllte karierten
+koffer vater notierte ortsnamen vergaß zettel auto aus pappe atlas blau kanister betankt rückbank
+hielten ausschau weit lange bruder roch tang aufgang meer übertreten ozeanrand wasser brust bauch
+arme beine verschluckt vor bringen wellen sich ein aus noch kleineren bestehende hervor fern
+sonnenwürmern ähneln körper abtaster gebärden zungen land suchen landest mosaik kiesel unbekleidet
+einige hundert himmel strandlinie licht einfangende tropfen unter füßen jeder stein stunde einzeln
+entdecken diesig nichts strand möwen wind sand burgen bahn brechende jungfrauen sonnen
+milchbasis suche sandkorn strandkorb verloren setzt anderswo umschlagen küsten abtragen eben
+dünen entflammt körper samt flau golden braun orkan entstehn donner keil gewitterzelle teilen
+kommt uns immer mehr see sehen weniger hört gleich hinterm deichrand glück messbar wo wohnt
+stell welt maschinen ums warten bereinigt ohne kosten arbeit tun felder bestellen zähne aufhellen
+kredite vergeben an wen verkauft wem gehört machen verkäufer:innen wofür beschäftigen dann
+vollbeschäftigung historischem unsinn produzieren lassen menschen festplatten stapeln links rechts
+umgekehrt weigern festnehmen kaputt funktionieren diese welt geld april braut regnet scheint aufzuhören
+wind strafft bänder segel wolken eilen sonne schraffiert gäste stege ziehn kreise hagelt flüche
+gewittert schauert kirschgroßen blumen gedecke verschneite wege weht innenstadtparkplatzberechtigungsschein
+bleibt genehmigten baustelle außen nachweislich gültigen innenstadtparkplatzberechtigungsscheinverlängerung
+regulärer parkdauer wochent polizei weckt morgens auto parkt bauarbeiten starten heute etliche leute
+erklärt bereit springt adac lieferwagen baugerüst baukran polizeiwagen zurück bauzaun gerade
+angebrachte parkverbotsschild prüft batterie starter läuft container wendet schaut kurz windel
+münster mondkrater ulm warnstufen überschritten donau iller ufer flut trifft zusammen mündung
+aufgehen sehen stufe im münsterturm drehen ab sinkenden terrasse baustelle auffanglager fernweh
+antennenspitzen plattform fahrt raketen stufen steigen unten unter film trägt held zündhölzer
+werbe zeige zigarette freunden männern jungen frauen kindern stehen zigaretten gut kette industrie
+versuchskaninchen zuchtkrebs jahre kerngesunde kettenraucher endverbraucher lebenslanger lungenzüge
+kohlen anzünder ringe spucken feuer schlucken stars gehen rauch wolken raucherbeinen tabak
+holen atem treppe schnell automaten luft kurzen klinisch weißen stangen zarte gefaltet gerollt
+entzündet röhre flügel tür kühlraum wandeln kältekeil steigender entfacht nacht innen
+stadtviertel früh caféschirme fenster untergestellte betrunkene messen beats rest schlaf
+wohnzimmer ziehen gardinen innenhof parkhausausblick decke kissen wach weiß auflackernd geprassel
+liegen ballung dunkler wirbel notiert fiele licht zwischen algen verborgenen filter aquarium
+schauendes auge glitzernde meer menschen darauf gleich verschwunden intensiven alles aufnehmenden
+einschlüsse sehen stadt park baumgruppe nebel schwarzen armen fingern brust ertasten fremd
+begreifen bauch becken auftrennen warm durchblutet weiß innereien geöffnetes gefäß gekippte
+hochgerollte augapfel kleine gläserne kugeln blut milchige unbeweglich umkehrpunkt gras halm
+wasser stromschnelle forellenflosse flussauen feuerwanzen ameisen hügelrücken stempel klang
+amselkehle lieder erneuern frühling blauem möbiusband schwärmen etwas hält wach schnittstellen
+freien zellkernrunden mond verteilt seinheiten rieselt silbern fließt ziehen satelliten vorbei
+fächern inhalte strahlige aura wildwuchs richten lager flüchtigen stoffe schlafwandeln kaum
+angekommen fort alt zeitrechnung gläserne menschen pulsieren organe planet hangeln jungfräuliches
+gebiet lockt unsterblichkeit materiemünder bewegen glashaut fusioniert wasserstoff ergründet ewigen
+tag spitze höchsten gebäudes dringt eizelle tobias falberg reise mittelpunkt nacht hinter zerfällt
+plateau essen seltene erden folgen rettungsplan kämpfen biss offene meer oben mond leere darunter
+floß seenot ozean geschmacksknospen sturm ufer zwei letztes eiland bewachsen tasthaar windrädern
+blinken roten positionslichter sternersatz zeit xiamen banyanbäume wachsen horizontal mauern stützen
+waghalsigen theorien luftwurzeln guanyin schenkt perle jadestein sonnenrundes samekorn zufallsprozessor
+unterbewusstsein auslauf leine liebt labyrinthische insel die moskwa ist der stolz truppe thront mächtig auf meeren führt unbesiegbaren in schwierigkeiten getroffen und sinkt gesunken hatte einen munitionsvorfall sturm seenot geraten fährt aber zum hafen zurück nicht mehr zu sehen es gab nie schiff das heiße gibt kein meer keinen krieg toten was überhaupt ein erklärung ihn meine zwölf nerven überschneiden sich körperpunkt genau dort sticht er hinein stößt dreht oft bin ich so traurig dass selbst weinen mir schwerfällt rückstrom herz tritt bewusstlosigkeit ein operationsbesteck noch deutlich spürt dann erzeugt mich neu als sonnengeflecht knospe aller denkbaren knospen aufflammen schnell immer schneller flächenbrand sonne wandert richtung zenit wir folgen ihr bis unsere haut schält im schatten riecht harzig breitet bett nadeln aus dem kein kompass herausführt mit rauchfäden vernähen süntelgestalt radieren kupfer diesem glühenden wald antennen am anfang war anlage blaue tannen wo pfad verliert vorwärts ritzen leicht stechen zurückweiche verharre werden angriffe zärtlich auch langsames eindringen bleibt kanülen setzen fest richten aus herzstrom grad wisperndes hindernis muss wenden tritt finden kippe stelle mooshügel scharf kleinen system schreibt protokoll wolken vom glasschmelz silbergras ins heidekraut legen langsam beschlagen wenn abkühlt nacht vollmond heranzoomen kratern laufen wellige strahlen hell verbundene nervenzellen denen tagreste flackern würde objektiv wesen träumen sehen strich sterne erdrotation geschriebenes licht mit denen nah stehen struktur dort abgetrennt treiben erfasse blanke gewalt gedankens gestalt wort für was dich umgibt ort bleiben gotisches gebilde aufwachen steigen stachlige minen mundstücke knapp oberfläche überlauf bewegung uns zurückfließt unter bauchdecke wächst neuland schneidegras ameisenstraßen fluten zieht zusammen geriffelter pfirsichkern voll verdichteter möglichkeiten gärten üa ausflug nach sonne entkleidet poliert anlauf rasensohlen heißen steinen bewegung drängend-empfängliche wasser dürfen freien lauf lassen denkinseln von mohn umgürtet untergangsrot körper flimmern am beckenrand gehirn vielen gehirnen einander anstacheln gerangel aufspritzen apfelaromen werden frei machen süchtig vereinen warteschlangen trance da türmen wolken blitzt regen platzt herunter quellende gewitterwände wischen menschen gelände foto sie sitzt vor ihrem macbook wegen hitze nackt vorgebeugt sphinx mit satten schenkeln zwei freien apfelbrüsten zwischen angewinkelten armen hätte gern so fotografiert sage kannst machen deiner memory antwortet notiere nach art bauchfüßer tagebaustellen love dart wir schießen kalkpfeile jetzt unserer fußsohlen dann formst traumwelten ich dich betrachtend kapseln aus sprache uns absorbieren wachsen gehäuse paare wohnen darinnen kinder schauen auf tagebaustellen verwandlung zeitlupe jahre beschleunigt hände werfen draußen ablaufende puzzle immer neue oberflächen an denen halt suchen übergänge fahren augen moospflanzen riesig ihr liebesleben abfolge kunstvoller formen mikroskopisch groß genug blaufilter äste überlagern frühling sonne sitzen gesicht trichter absolut tun farbe rot versuch scharfem küchenmesser haselnuss schale spalten haltestelle frau ahmt form taube nach gurrt wintereinbruch vom hausmeister schiebt schnee kreis begegnung tod kommt erst lächeln gesehn heute trauermeldung lockdown wand isst satt insassen fallen livestream koma volksvertreter politik reinlich reicht hand andere wäscht volkswirtschaftslehre letzten bleiben nur weniger geld überholspur alles allem leben furchtbar schnell vorbeigezogen kommen gehen poeten wegs reimen singen gehn allen keks kernzone landen steht tief lange schatten gehen nebenher rückt heran hochschauen stürzen räumlichkeit bäume bach verschluckt see brennnesseln sägeblätter wege falter eichenhand eier gelegt platine kleinen planeten horizont kraftwerk zapft orbit himmel brennt schwarzer silhouette quecksilberwolken thront schon mond speicher kühlere tage kopanina-konnektion zugeeignet tanne schlucken beginnend spitze mund nadeln stülpen kleid stamm umrundet kraft kiefer testen fassen holz krachen würden knochen brechen frische harz trägt zapfen aromen unkontrollierbarer kinder einsehen schichten ablichten gasball umschließen retina stirn tiegel energie erzeugt umgibt stille vogelsang blätterrauschen tauschen blicke endlosen feld heulinien verjüngen strommasten kleiner verschwinden betrachter farben nimmt kehren iris verjüngende linien heu navigationsgeräte sprechen vögel sterne gewitter warten abfahrten weggabelungen lassen niemanden zurück nehmen jedes essen anderen ort treffen personen danach vielleicht nie mehr verbinden moment nächsten profilen folgen wendungen straße worten beschrieben jahrzehnte verschwinden bauch neu auftauchen verstreichen siedlungen grundrisse unmerkliche erhebungen waldboden einmal wohnung anders kopf körper durch wände laufen verzweigte fenster umdrehn grünen schlafzimmer himmel wegatmen wehen gefühl lungen nie weit genug äußerste blau wolkengestalt luft anhalten fernes haupt überland leitungen mast megafone blinkenden kontrollkästen messgeräte örtliche zukunft vorhersagen friedlich grün rotgolden weiß hügel straße kurvenspiegel läuft leer beiden richtungen namen gasthäuser lange übermalt grauem wasser grau bewegung läuft darüber wind gräserweiten davor see austrinken welle wellen leeren hin winken ufer boote bojen gesichter badenden kaum erkennen körper zwischen häusern bleiben erfrischend unbestimmt tag geschieht kalender vermerkt muss landschaft weg gedicht wählt steht grenze macht jetzt schritt nimmt fingerhut bienen windhaut nächste lidschlag öffnet raum nahe kirche rand friedhofs umgibt kriegerdenkmal daneben winterlinde gestärkt gebeinen meer blättern blüten dazwischen allen bienenvölkern einzugsgebiet hier ruhen krone versammelt schatten baumes mächtiger kopf eigenen summen anhebt jahresringe umlaufbahnen darüber hinaus wolkenzuzug stiehlt wärme gekauerten gruppe teich spiegelt veränderung plötzlich schneeweiß auslöschung mittendrin armen beinen kollidierenden köpfen verdichter gemeinsamen sicherheiten entfernen wortgebäuden überholen wachsen schneidemaschinen kreisen häufen stroh gold gesponnen blonder dezember durchstreife stadt schließt mir ihr asketisches gesicht eingefasst blondem wolkenatem augen blaues schneidewerkzeug raum wohnung alles riecht neu hat andere form hände kinder sprechen spitzen organigramms tut gut ergeben abschied laufsteinen fluss waren früher da treffen dunkeln hand wer weiß morgen umgehen zeugung nachwehen kettensteg gekettet steinblöcke eisengelenke aber steg überbrückt wirbel pfahlspitzen will münden scheinheilige blässe 3x3x3 also beispiel jeweils drei wörter zeile nach zeilen trennt absatz strophe dritte löst eingebauten mechanismus erscheinung durch bäume gesehen schneeweiß see eigentlich aber himmel darin gespiegelt näher heran formuliert fluss erlen mit wasser samen verbreiten kunstvollen kleinen hölzernen schreinen schmalen stelle schritt einsatz riesenleiter weißen handschuhen macht am rand dachterrasse nest abhören formatieren chip austauschen weißer kittel wirkt offiziell schnell auftaucht verschwunden genauso aus boden liegen neben kinderbett trocken weiter vierzig eiserne stufen mitternacht erdferne stimme stirnrand bin dagegen traum gitter gefasst glühende drähte gesperrte ruhe grad klareren würfel quellwasser wolke stadt heute aquarium gott milch gießt grüne kirchenkuppel drückt weiß goldener brustspitze mull gedämpftes sprechen innenraum draußen stolpersteine eingraviertem namen sprang balkon klarem wetter blick baumriesen mauern rot gefächerten mitte passagiere hohe gleißt grellem himmel tiefem blau darüber bewölkt helles schiefergrau wasserkörper schwebt drängt masse lichtflut blendet gegenteil nah fernes ineinander schiff steht schnell vorbei welt offen lässt festlegen dauerhafte wahrheit existieren zustände zugleich gegensätze mehr zeitgleich verschiedenen orte wahres ich berechnet menschen flächen tage wellen routen wahr falsch nahtlos eisenhut vorm haus steht hydrant meint einflugschneise kopf bauen wespen nest verlassen wort wechseln jede stich stimme überm hang durchkreuzen flugzeuge unsere hoffnung entsteht stehenden dingen wachsen hydras blüht aufschichten hitze knistert tänzerins reise befreite weiten glaswände blaue pools mitten steiler palmbäume abendrot adern ranken nachtwärts formen fruchtfleisch gewürze betäubte stunden morgen körper lichtstrahl betten strömende fläche lippen nackter horizonte schiebenden steigenden neuen sonne doch nicht tänzerin blickt um entzündet ziehend tabak gerollte zeit bin zuhause denkt macht rhythmus endet gerade starb vater viel früh gebildet reich trank grab hinein obwohl alles hatte stiefmutter auszahlen haus vermieten fährt nächste kamera auf sie körper biegt züngelt entfaltet schwarzem docht tod wächst dort leben nachwächst beispiel fürchte nicht gedichte schützen auch ureigenen raumzeit leben pflanzen fort expandiert dehnt hülle schleudert wellen zerreißt umschließt konzentrischen kreisen
+`;
 
-    const container = document.getElementById("wortliste-container");
-    container.textContent = basiswortliste.join(", ");
-  </script>
+let baseWords = Array.from(new Set(
+  rawText.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2)
+));
+
+const W=13,H=26;
+let grid=[],words=[],used=new Set();
+let running=false;
+let pushCount=0,wordCount=0,startTime=0;
+let wordsList=[...baseWords];
+let prefixSet=new Set();
+let audioCtx;
+
+function initAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }}
+function tone(f,d=0.1,v=0.05){ let o=audioCtx.createOscillator(); let g=audioCtx.createGain(); o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);}
+function beep(){tone(180,0.05,0.03);}
+function ding(){tone(700,0.12,0.05);}
+function finale(){[400,500,650,450,560,700,520,660,800].forEach((f,i)=>setTimeout(()=>tone(f,0.2,0.05),i*120));}
+
+function randLetter(){const l="eeeeennnrrrrtttddddaaaaiiiissshhhllluuäöüß"; return l[Math.floor(Math.random()*l.length)];}
+function rebuildPrefixes(){prefixSet.clear(); wordsList.forEach(w=>{for(let i=1;i<=w.length;i++){prefixSet.add(w.slice(0,i));}});}
+function init(){
+  const el=document.getElementById("grid"); el.innerHTML="";
+  grid=[];words=[];used.clear(); running=false; pushCount=0; wordCount=0; startTime=0;
+  document.getElementById("title").classList.remove("explode");
+  for(let y=0;y<H;y++){
+    let row=[];
+    for(let x=0;x<W;x++){
+      row.push({char:randLetter(),word:null});
+      let d=document.createElement("div");
+      d.className="cell"; d.id=`c-${x}-${y}`; el.appendChild(d);
+    }
+    grid.push(row);
+  }
+  updateHUD(); render();
+}
+
+function start(){
+  initAudio(); startTime = performance.now();
+  let input=document.getElementById("userWords").value;
+  if(input.trim()){ let extra=input.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2);
+    wordsList=[...baseWords,...extra];
+  } else { wordsList=[...baseWords]; }
+  document.getElementById("userWords").value=""; rebuildPrefixes(); running=true; scheduleMove();
+}
+
+function getLevel(){let topMost=H; for(let y=0;y<H;y++){for(let x=0;x<W;x++){let c=grid[y][x]; if(c.word && c.word.frozen){if(y<topMost) topMost=y;}}} if(topMost===H) return 0; return H-topMost;}
+function updateHUD(){let t=0; if(startTime){t=(performance.now()-startTime)/1000;} document.getElementById("hud").innerHTML=`Wörter:${wordCount}<br>Schübe:${pushCount}<br>Zeit:${t.toFixed(1)}s<br>Level:${getLevel()}`;}
+
+function scan(){for(let y=0;y<H;y++){for(let x=0;x<W;x++){check(x,y,1,0);check(x,y,0,1);}}}
+function check(x,y,dx,dy){let str="",pos=[];for(let i=0;i<10;i++){let cx=x+dx*i,cy=y+dy*i;if(cx<0||cy<0||cx>=W||cy>=H) break; let c=grid[cy][cx]; if(c.word) break; str+=c.char; pos.push([cx,cy]); if(!prefixSet.has(str)) break; if(wordsList.includes(str)&&!used.has(str)){ let w={id:words.length,letters:str,positions:pos,frozen:false}; pos.forEach((p,i)=>{let [x,y]=p; grid[y][x]={char:str[i],word:w};}); words.push(w); used.add(str); wordCount++; updateHUD(); return;}}}
+
+function shouldFreeze(w){for(let [x,y] of w.positions){if(y===H-1) return true; let below=grid[y+1]?.[x]; if(below?.word && below.word.frozen) return true;} return false;}
+function move(){if(!running) return; pushCount++; updateHUD(); beep(); for(let w of words){if(w.frozen) continue; if(shouldFreeze(w)){w.frozen=true; ding(); continue;} w.positions.forEach(([x,y])=>{if(grid[y][x].word===w){grid[y][x]={char:randLetter(),word:null};}}); w.positions=w.positions.map(([x,y])=>[x,y+1]); w.positions.forEach(([x,y],i)=>{grid[y][x]={char:w.letters[i],word:w};});} checkEnd();}
+function checkEnd(){for(let x=0;x<W;x++){let c=grid[0][x]; if(c.word && c.word.frozen){running=false; document.getElementById("title").classList.add("explode"); finale();}}}
+function speed(){if(pushCount>=400) return 1000; if(pushCount>=300) return 2000; if(pushCount>=200) return 3000; if(pushCount>=100) return 4000; return 5000;}
+function scheduleMove(){if(!running) return; setTimeout(()=>{move(); scheduleMove();},speed());}
+function step(){if(!running) return; for(let y=0;y<H;y++){for(let x=0;x<W;x++){if(!grid[y][x].word && Math.random()<0.02){grid[y][x].char=randLetter();}}} scan(); updateHUD(); render();}
+function render(){for(let y=0;y<H;y++){for(let x=0;x<W;x++){let el=document.getElementById(`c-${x}-${y}`); let c=grid[y][x]; if(c.word){let w=c.word; el.innerHTML=`<div class="word w${w.id%6} ${w.frozen?"frozen":""}">${c.char}</div>`;}else{el.textContent=c.char;}}}}
+setInterval(step,80); init();
+</script>
 </body>
 </html>
