@@ -1,18 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>{{ page.title }}</title>
-  <link rel="stylesheet" href="/assets/style.css">
+<meta charset="UTF-8">
+<title>{{ page.title }}</title>
+<style>
+/* ================= GLOBAL ================= */
+body {
+  background: #050505;       /* dunkler Hintergrund wie Textris */
+  margin: 0;
+  font-family: monospace;    /* gleiche Schrift wie Textris */
+  color: #66ffcc;            /* gleiche Schriftfarbe */
+  padding-top: 60px;         /* Platz für Navigation */
+}
+
+/* ================= NAVIGATION ================= */
+nav {
+  width: 100%;
+  background: #111;
+  padding: 10px;
+  display: flex;
+  gap: 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+nav a {
+  color: #66ffcc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #fff;
+}
+
+/* ================= CONTENT ================= */
+main {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+/* ================= OPTIONAL: H1-H6 wie Textris ================= */
+h1, h2, h3, h4, h5, h6 {
+  color: #66ffcc;
+  font-family: monospace;
+}
+</style>
 </head>
 <body>
-  <nav>
-    <a href="/">Start</a>
-    <a href="/about/">Über mich</a>
-    <a href="/publications/">Veröffentlichungen</a>
-    <a href="/vita/">Vita</a>
-  </nav>
-  <hr>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="/">Textris</a>
+  <a href="/about/">Über mich</a>
+  <a href="/publications/">Veröffentlichungen</a>
+  <a href="/vita/">Vita</a>
+</nav>
+
+<main>
   {{ content }}
+</main>
+
 </body>
 </html>
