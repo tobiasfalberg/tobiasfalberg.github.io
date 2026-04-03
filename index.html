@@ -9,93 +9,119 @@ permalink: /
 <head>
 <meta charset="UTF-8">
 <title>Textris</title>
-
 <style>
+/* ================= GLOBAL ================= */
 body {
   background:#050505;
   margin:0;
   display:flex;
   flex-direction:column;
   align-items:center;
+  justify-content:flex-start;
+  height:100vh;
   font-family: monospace;
   color:#66ffcc;
 }
 
-/* NAV */
+/* ================= NAVIGATION ================= */
 nav {
-  width:100%;
-  background:#111;
-  padding:10px;
-  display:flex;
-  gap:1em;
-  position:fixed;
-  top:0;
-  z-index:10;
+  width: 100%;
+  background: #111;
+  padding: 10px;
+  display: flex;
+  gap: 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
 }
-nav a {color:#66ffcc;text-decoration:none;font-weight:bold;}
-nav a:hover {color:#fff;}
 
-/* TITLE */
+nav a {
+  color: #66ffcc;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  color: #fff;
+}
+
+/* ================= HUD & TITLE ================= */
 #title {
+  color:#66ffcc;
   font-size:26px;
-  margin:70px 0 10px 0;
-  transition:0.3s;
-  position:relative;
+  margin:70px 0 10px 0; /* Platz für Navigation */
+  transition:0.5s;
+  position: relative;
 }
 
-.explode {
-  color:red !important;
-  transform:scale(2);
-  letter-spacing:10px;
+.pixel {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: red;
+  pointer-events: none;
 }
 
-/* PARTICLES */
-.particle {
-  position:absolute;
-  width:4px;
-  height:4px;
-  background:red;
-  pointer-events:none;
-  animation:explode 0.8s ease-out forwards;
+#hud {
+  position:fixed;
+  top:50px;
+  left:15px;
+  color:#66ffcc;
 }
 
-@keyframes explode {
-  to {
-    transform:translate(var(--x), var(--y)) scale(0.5);
-    opacity:0;
-  }
+#inputBox {
+  position:fixed;
+  top:110px;
+  left:15px;
+  color:#66ffcc;
 }
-
-/* HUD */
-#hud {position:fixed;top:50px;left:15px;}
-#inputBox {position:fixed;top:110px;left:15px;}
 
 textarea {
-  width:260px;height:70px;
-  background:#111;color:#eee;
+  width:260px;
+  height:70px;
+  background:#111;
+  color:#eee;
 }
 
-#clearBtn {position:fixed;bottom:20px;right:20px;}
+#startBtn {margin-top:6px;}
+#clearBtn {position:fixed; bottom:20px; right:20px;}
+
 #copyright {
-  position:fixed;bottom:20px;left:20px;
-  color:#666;font-size:12px;
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  color:#666;
+  font-size:12px;
 }
 
-/* GRID */
+/* ================= GRID ================= */
 #grid {
   display:grid;
   grid-template-columns:repeat(13,22px);
   grid-template-rows:repeat(26,22px);
-  margin-top:200px;
+  margin-top: 200px;
 }
 
 .cell {
-  width:22px;height:22px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;color:#444;
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:#444;
 }
 
-.word {color:white;}
+.word {
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+}
+
 .frozen {outline:1px solid rgba(255,255,255,0.3);}
 
 .w0{background:#1e3a5f;}
@@ -104,138 +130,151 @@ textarea {
 .w3{background:#4a2a5f;}
 .w4{background:#5f4a2a;}
 .w5{background:#2a5f5f;}
-
-/* SEO INTRO */
-#seoIntro {
-  position:fixed;
-  inset:0;
-  background:#050505;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-  color:#66ffcc;
-  font-size:14px;
-  text-align:center;
-  padding:40px;
-}
 </style>
 </head>
 
 <body>
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="/">Textris</a>
+    <a href="/about/">Über mich</a>
+    <a href="/publications/">Veröffentlichungen</a>
+    <a href="/vita/">Vita</a>
+  </nav>
 
-<div id="seoIntro">
-Tobias Falberg – Plastiniertes Gelände – Wir singen das Wort Kerosin – Bild-Text-Gedichte
-</div>
+  <!-- SPIEL -->
+  <div id="title">Textris</div>
+  <div id="hud">Wörter:0<br>Schübe:0<br>Zeit:0.0s<br>Level:0</div>
 
-<nav>
-<a href="/">Textris</a>
-<a href="/about/">Über mich</a>
-<a href="/publications/">Veröffentlichungen</a>
-<a href="/vita/">Vita</a>
-</nav>
+  <div id="inputBox">
+    <div>Textverwertung oder Start</div>
+    <textarea id="userWords"></textarea><br>
+    <button id="startBtn" onclick="start()">Start</button>
+  </div>
 
-<div id="title">Textris</div>
-<div id="hud">Wörter:0<br>Schübe:0<br>Zeit:0.0s<br>Level:0</div>
+  <button id="clearBtn" onclick="init()">Clear</button>
+  <div id="copyright">© Tobias Falberg</div>
+  <div id="grid"></div>
 
-<div id="inputBox">
-<textarea id="userWords"></textarea><br>
-<button onclick="start()">Start</button>
-</div>
+  <!-- ================= SPIEL SCRIPT ================= -->
+  <script>
+const rawText = `...`; // hier kommt dein langer Text aus Code 13
 
-<button id="clearBtn" onclick="init()">Clear</button>
-<div id="copyright">© Tobias Falberg</div>
-<div id="grid"></div>
+let baseWords = Array.from(new Set(
+  rawText.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2)
+));
 
-<script>
 const W=13,H=26;
 let grid=[],words=[],used=new Set();
-let running=false,pushCount=0,wordCount=0,startTime=0;
+let running=false;
+let pushCount=0,wordCount=0,startTime=0;
+let wordsList=[...baseWords];
+let prefixSet=new Set();
+let audioCtx;
 
-function randLetter(){
-  const l="eeeeennnrrrrtttddddaaaaiiiissshhhllluuäöüß";
-  return l[Math.floor(Math.random()*l.length)];
-}
+function initAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }}
+function tone(f,d=0.1,v=0.05){ let o=audioCtx.createOscillator(); let g=audioCtx.createGain(); o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);}
+function beep(){tone(180,0.05,0.03);}
+function ding(){tone(700,0.12,0.05);}
+function finale(){explodeTitle();[400,500,650,450,560,700,520,660,800].forEach((f,i)=>setTimeout(()=>tone(f,0.2,0.05),i*120));}
 
+function randLetter(){const l="eeeeennnrrrrtttddddaaaaiiiissshhhllluuäöüß"; return l[Math.floor(Math.random()*l.length)];}
+function rebuildPrefixes(){prefixSet.clear(); wordsList.forEach(w=>{for(let i=1;i<=w.length;i++){prefixSet.add(w.slice(0,i));}});}
 function init(){
-  const el=document.getElementById("grid");
-  el.innerHTML="";
-  grid=[];words=[];used.clear();
-  running=false;pushCount=0;wordCount=0;startTime=0;
-
+  const el=document.getElementById("grid"); el.innerHTML="";
+  grid=[];words=[];used.clear(); running=false; pushCount=0; wordCount=0; startTime=0;
+  document.getElementById("title").classList.remove("explode");
+  document.getElementById("title").style.fontSize="26px";
+  document.getElementById("title").style.color="#66ffcc";
   for(let y=0;y<H;y++){
     let row=[];
     for(let x=0;x<W;x++){
       row.push({char:randLetter(),word:null});
       let d=document.createElement("div");
-      d.className="cell";
-      d.id=`c-${x}-${y}`;
-      el.appendChild(d);
+      d.className="cell"; d.id=`c-${x}-${y}`; el.appendChild(d);
     }
     grid.push(row);
   }
-  render();
+  updateHUD(); render();
 }
 
 function start(){
-  running=true;
-  startTime=performance.now();
+  initAudio(); startTime = performance.now();
+  let input=document.getElementById("userWords").value;
+  if(input.trim()){ let extra=input.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2);
+    wordsList=[...baseWords,...extra];
+  } else { wordsList=[...baseWords]; }
+  document.getElementById("userWords").value=""; rebuildPrefixes(); running=true; scheduleMove();
 }
 
-function render(){
-  for(let y=0;y<H;y++){
-    for(let x=0;x<W;x++){
-      let el=document.getElementById(`c-${x}-${y}`);
-      el.textContent=grid[y][x].char;
+function getLevel(){let topMost=H; for(let y=0;y<H;y++){for(let x=0;x<W;x++){let c=grid[y][x]; if(c.word && c.word.frozen){if(y<topMost) topMost=y;}}} if(topMost===H) return 0; return H-topMost;}
+function updateHUD(){let t=0; if(startTime){t=(performance.now()-startTime)/1000;} document.getElementById("hud").innerHTML=`Wörter:${wordCount}<br>Schübe:${pushCount}<br>Zeit:${t.toFixed(1)}s<br>Level:${getLevel()}`;}
+
+function scan(){for(let y=0;y<H;y++){for(let x=0;x<W;x++){check(x,y,1,0);check(x,y,0,1);}}}
+function check(x,y,dx,dy){let str="",pos=[];for(let i=0;i<10;i++){let cx=x+dx*i,cy=y+dy*i;if(cx<0||cy<0||cx>=W||cy>=H) break; let c=grid[cy][cx]; if(c.word) break; str+=c.char; pos.push([cx,cy]); if(!prefixSet.has(str)) break; if(wordsList.includes(str)&&!used.has(str)){ let w={id:words.length,letters:str,positions:pos,frozen:false}; pos.forEach((p,i)=>{let [x,y]=p; grid[y][x]={char:str[i],word:w};}); words.push(w); used.add(str); wordCount++; updateHUD(); return;}}}
+
+function shouldFreeze(w){for(let [x,y] of w.positions){if(y===H-1) return true; let below=grid[y+1]?.[x]; if(below?.word && below.word.frozen) return true;} return false;}
+function move(){if(!running) return; pushCount++; updateHUD(); beep(); for(let w of words){if(w.frozen) continue; if(shouldFreeze(w)){w.frozen=true; ding(); continue;} w.positions.forEach(([x,y])=>{if(grid[y][x].word===w){grid[y][x]={char:randLetter(),word:null};}}); w.positions=w.positions.map(([x,y])=>[x,y+1]); w.positions.forEach(([x,y],i)=>{grid[y][x]={char:w.letters[i],word:w};});} checkEnd();}
+function checkEnd(){
+  let end=false;
+  for(let x=0;x<W;x++){
+    let c=grid[0][x];
+    if(c.word && c.word.frozen){
+      running=false;
+      end=true;
     }
   }
+  if(end){
+    document.getElementById("title").style.fontSize="60px";
+    document.getElementById("title").style.color="red";
+    explodeTitle();
+    // Level direkt auf Maximum setzen
+    document.getElementById("hud").innerHTML=document.getElementById("hud").innerHTML.replace(/Level:\d+/,"Level:26");
+    finale();
+  }
 }
+function speed(){if(pushCount>=400) return 1000; if(pushCount>=300) return 2000; if(pushCount>=200) return 3000; if(pushCount>=100) return 4000; return 5000;}
+function scheduleMove(){if(!running) return; setTimeout(()=>{move(); scheduleMove();},speed());}
+function step(){if(!running) return; for(let y=0;y<H;y++){for(let x=0;x<W;x++){if(!grid[y][x].word && Math.random()<0.02){grid[y][x].char=randLetter();}}} scan(); updateHUD(); render();}
+function render(){for(let y=0;y<H;y++){for(let x=0;x<W;x++){let el=document.getElementById(`c-${x}-${y}`); let c=grid[y][x]; if(c.word){let w=c.word; el.innerHTML=`<div class="word w${w.id%6} ${w.frozen?"frozen":""}">${c.char}</div>`;}else{el.textContent=c.char;}}}}
 
+// =================== EXPLOSION ===================
 function explodeTitle(){
-  const title=document.getElementById("title");
-  title.classList.add("explode");
-
-  const rect=title.getBoundingClientRect();
-
-  for(let i=0;i<80;i++){
-    let p=document.createElement("div");
-    p.className="particle";
-
-    p.style.left=rect.width/2+"px";
-    p.style.top=rect.height/2+"px";
-
-    p.style.setProperty("--x",(Math.random()*200-100)+"px");
-    p.style.setProperty("--y",(Math.random()*200-100)+"px");
-
-    title.appendChild(p);
+  const title = document.getElementById("title");
+  const rect = title.getBoundingClientRect();
+  const centerX = rect.left + rect.width/2;
+  const centerY = rect.top + rect.height/2;
+  
+  for(let i=0;i<100;i++){
+    const px = document.createElement("div");
+    px.className="pixel";
+    document.body.appendChild(px);
+    px.style.left = centerX + "px";
+    px.style.top = centerY + "px";
+    
+    const angle = Math.random()*2*Math.PI;
+    const speed = 2+Math.random()*4;
+    const dx = Math.cos(angle)*speed;
+    const dy = Math.sin(angle)*speed;
+    
+    let life=0;
+    const maxLife = 50+Math.random()*30;
+    
+    function anim(){
+      life++;
+      px.style.left = (parseFloat(px.style.left)+dx) + "px";
+      px.style.top = (parseFloat(px.style.top)+dy) + "px";
+      px.style.opacity = (1-life/maxLife);
+      if(life<maxLife){
+        requestAnimationFrame(anim);
+      } else { px.remove(); }
+    }
+    anim();
   }
 }
 
-function gameOver(){
-  running=false;
-
-  document.getElementById("hud").innerHTML =
-    "Wörter:"+wordCount+
-    "<br>Schübe:"+pushCount+
-    "<br>Zeit:--"+
-    "<br>Level:26";
-
-  explodeTitle();
-}
-
-/* DEMO: Game Over nach 3 Sekunden */
-setTimeout(gameOver,3000);
-
-/* SEO INTRO HANDLING */
-window.onload=()=>{
-  init();
-
-  setTimeout(()=>{
-    document.getElementById("seoIntro").style.display="none";
-    init(); // wichtig: Spiel danach sauber laden
-  },1200);
-};
+setInterval(step,80); 
+init();
 </script>
-
 </body>
 </html>
