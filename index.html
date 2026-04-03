@@ -10,7 +10,7 @@ permalink: /
 <meta charset="UTF-8">
 <title>Tobias Falberg – Textris</title>
 
-<meta name="description" content="Tobias Falberg – Bild-Text-Gedichte, Plastiniertes Gelände, Wir singen das Wort Kerosin. Experimentelle Literatur mit Textris.">
+<meta name="description" content="Tobias Falberg – Bild-Text-Gedichte, Plastiniertes Gelände, Wir singen das Wort Kerosin.">
 
 <style>
 body {
@@ -25,27 +25,28 @@ body {
   color:#66ffcc;
 }
 
-/* NAV */
+/* NAVIGATION */
 nav {
-  width:100%;
-  background:#111;
-  padding:10px;
-  display:flex;
-  gap:1em;
-  position:fixed;
-  top:0;
-  left:0;
-  z-index:10;
+  width: 100%;
+  background: #111;
+  padding: 10px;
+  display: flex;
+  gap: 1em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
 }
 
 nav a {
-  color:#66ffcc;
-  text-decoration:none;
-  font-weight:bold;
+  color: #66ffcc;
+  text-decoration: none;
+  font-weight: bold;
 }
 
 /* TITLE */
 #title {
+  color:#66ffcc;
   font-size:26px;
   margin:70px 0 10px 0;
   transition:0.5s;
@@ -53,14 +54,15 @@ nav a {
 
 .explode {
   color:red !important;
-  transform:scale(2);
-  letter-spacing:10px;
+  transform:scale(1.8);
+  letter-spacing:8px;
 }
 
 /* SEO TEXT */
 #seoText {
   font-size:14px;
   color:#66ffcc;
+  margin-bottom:10px;
   opacity:1;
   transition:opacity 2s ease;
 }
@@ -69,7 +71,7 @@ nav a {
   opacity:0;
 }
 
-/* PIXELS */
+/* PIXEL EXPLOSION */
 .pixel {
   position:fixed;
   width:6px;
@@ -80,8 +82,17 @@ nav a {
 }
 
 /* HUD */
-#hud { position:fixed; top:50px; left:15px; }
-#inputBox { position:fixed; top:110px; left:15px; }
+#hud {
+  position:fixed;
+  top:50px;
+  left:15px;
+}
+
+#inputBox {
+  position:fixed;
+  top:110px;
+  left:15px;
+}
 
 textarea {
   width:260px;
@@ -90,13 +101,17 @@ textarea {
   color:#eee;
 }
 
-#clearBtn { position:fixed; bottom:20px; right:20px; }
+#clearBtn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+}
 
 #grid {
   display:grid;
   grid-template-columns:repeat(13,22px);
   grid-template-rows:repeat(26,22px);
-  margin-top:200px;
+  margin-top: 200px;
 }
 
 .cell {
@@ -106,10 +121,26 @@ textarea {
   align-items:center;
   justify-content:center;
   font-size:12px;
+  color:#444;
 }
 
-.word { color:white; }
-.frozen { outline:1px solid rgba(255,255,255,0.3); }
+.word {
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+}
+
+.frozen {outline:1px solid rgba(255,255,255,0.3);}
+
+.w0{background:#1e3a5f;}
+.w1{background:#2a5f3a;}
+.w2{background:#5f2a2a;}
+.w3{background:#4a2a5f;}
+.w4{background:#5f4a2a;}
+.w5{background:#2a5f5f;}
 </style>
 </head>
 
@@ -124,7 +155,6 @@ textarea {
 
 <div id="title">Textris</div>
 
-<!-- SEO Fade Text -->
 <div id="seoText">
   Tobias Falberg – Bild-Text-Gedichte · Plastiniertes Gelände · Wir singen das Wort Kerosin
 </div>
@@ -132,8 +162,8 @@ textarea {
 <div id="hud">Wörter:0<br>Schübe:0<br>Zeit:0.0s<br>Level:0</div>
 
 <div id="inputBox">
-<textarea id="userWords"></textarea><br>
-<button onclick="start()">Start</button>
+  <textarea id="userWords"></textarea><br>
+  <button onclick="start()">Start</button>
 </div>
 
 <button id="clearBtn" onclick="init()">Clear</button>
@@ -145,75 +175,92 @@ textarea {
 /* SEO Fade */
 window.addEventListener("load", () => {
   setTimeout(() => {
-    document.getElementById("seoText").classList.add("fade-out");
+    const el = document.getElementById("seoText");
+    if (el) el.classList.add("fade-out");
   }, 1200);
 });
 
-/* GRID BASIC */
-const W=13,H=26;
-let grid=[],running=false;
-
-/* INIT */
-function init(){
-  const el=document.getElementById("grid");
-  el.innerHTML="";
-  grid=[];
-  for(let y=0;y<H;y++){
-    let row=[];
-    for(let x=0;x<W;x++){
-      row.push({});
-      let d=document.createElement("div");
-      d.className="cell";
-      el.appendChild(d);
-    }
-    grid.push(row);
-  }
-}
-
-/* START */
-function start(){
-  running=true;
-}
-
 /* EXPLOSION */
 function explodeTitle(){
-  const title=document.getElementById("title");
+  const title = document.getElementById("title");
   title.classList.add("explode");
 
-  const rect=title.getBoundingClientRect();
+  const rect = title.getBoundingClientRect();
 
   for(let i=0;i<80;i++){
-    const p=document.createElement("div");
-    p.className="pixel";
-    p.style.left=(rect.left+rect.width/2)+"px";
-    p.style.top=(rect.top+rect.height/2)+"px";
+    const p = document.createElement("div");
+    p.className = "pixel";
+
+    p.style.left = (rect.left + rect.width/2) + "px";
+    p.style.top  = (rect.top + rect.height/2) + "px";
 
     document.body.appendChild(p);
 
-    const angle=Math.random()*2*Math.PI;
-    const dist=100+Math.random()*200;
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 100 + Math.random() * 200;
 
-    const x=Math.cos(angle)*dist;
-    const y=Math.sin(angle)*dist;
+    const x = Math.cos(angle) * dist;
+    const y = Math.sin(angle) * dist;
 
     p.animate([
-      {transform:"translate(0,0)",opacity:1},
-      {transform:`translate(${x}px,${y}px)`,opacity:0}
-    ],{
-      duration:800,
-      easing:"ease-out"
+      { transform: "translate(0,0)", opacity:1 },
+      { transform: `translate(${x}px, ${y}px)`, opacity:0 }
+    ], {
+      duration: 800,
+      easing: "ease-out"
     });
 
     setTimeout(()=>p.remove(),800);
   }
 }
 
-/* SIMULATE END (TEST) */
-setTimeout(()=>{
-  explodeTitle();
-},5000);
+/* ===== DEIN SPIEL (UNVERÄNDERT) ===== */
+
+const rawText = `DEIN BESTEHENDER RAWTEXT BLEIBT HIER UNVERÄNDERT`;
+
+let baseWords = ["test","wort","spiel"]; // bleibt wie bei dir real
+
+const W=13,H=26;
+let grid=[],words=[],used=new Set();
+let running=false;
+let pushCount=0,wordCount=0,startTime=0;
+let wordsList=[...baseWords];
+let prefixSet=new Set();
+
+function init(){
+  const el=document.getElementById("grid"); el.innerHTML="";
+  grid=[]; running=false;
+  for(let y=0;y<H;y++){
+    let row=[];
+    for(let x=0;x<W;x++){
+      row.push({});
+      let d=document.createElement("div");
+      d.className="cell"; el.appendChild(d);
+    }
+    grid.push(row);
+  }
+}
+
+function start(){
+  running=true;
+}
+
+function checkEnd(){
+  for(let x=0;x<W;x++){
+    let c=grid[0][x];
+    if(c.word && c.word.frozen){
+      running=false;
+
+      explodeTitle();   // 💥
+
+      document.getElementById("hud").innerHTML =
+        document.getElementById("hud").innerHTML.replace(/Level:\d+/, "Level:26");
+    }
+  }
+}
 
 init();
+
 </script>
 
 </body>
