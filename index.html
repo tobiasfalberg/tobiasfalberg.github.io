@@ -8,9 +8,7 @@ permalink: /
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Tobias Falberg – Textris</title>
-
-<meta name="description" content="Tobias Falberg – Bild-Text-Gedichte, Plastiniertes Gelände, Wir singen das Wort Kerosin.">
+<title>Textris</title>
 
 <style>
 body {
@@ -19,120 +17,85 @@ body {
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:flex-start;
-  height:100vh;
   font-family: monospace;
   color:#66ffcc;
 }
 
-/* NAVIGATION */
+/* NAV */
 nav {
-  width: 100%;
-  background: #111;
-  padding: 10px;
-  display: flex;
-  gap: 1em;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10;
+  width:100%;
+  background:#111;
+  padding:10px;
+  display:flex;
+  gap:1em;
+  position:fixed;
+  top:0;
+  z-index:10;
 }
-
-nav a {
-  color: #66ffcc;
-  text-decoration: none;
-  font-weight: bold;
-}
+nav a {color:#66ffcc;text-decoration:none;font-weight:bold;}
+nav a:hover {color:#fff;}
 
 /* TITLE */
 #title {
-  color:#66ffcc;
   font-size:26px;
   margin:70px 0 10px 0;
-  transition:0.5s;
+  transition:0.3s;
+  position:relative;
 }
 
 .explode {
   color:red !important;
-  transform:scale(1.8);
-  letter-spacing:8px;
+  transform:scale(2);
+  letter-spacing:10px;
 }
 
-/* SEO TEXT */
-#seoText {
-  font-size:14px;
-  color:#66ffcc;
-  margin-bottom:10px;
-  opacity:1;
-  transition:opacity 2s ease;
-}
-
-#seoText.fade-out {
-  opacity:0;
-}
-
-/* PIXEL EXPLOSION */
-.pixel {
-  position:fixed;
-  width:6px;
-  height:6px;
-  background:#ff4444;
+/* PARTICLES */
+.particle {
+  position:absolute;
+  width:4px;
+  height:4px;
+  background:red;
   pointer-events:none;
-  z-index:999;
+  animation:explode 0.8s ease-out forwards;
+}
+
+@keyframes explode {
+  to {
+    transform:translate(var(--x), var(--y)) scale(0.5);
+    opacity:0;
+  }
 }
 
 /* HUD */
-#hud {
-  position:fixed;
-  top:50px;
-  left:15px;
-}
-
-#inputBox {
-  position:fixed;
-  top:110px;
-  left:15px;
-}
+#hud {position:fixed;top:50px;left:15px;}
+#inputBox {position:fixed;top:110px;left:15px;}
 
 textarea {
-  width:260px;
-  height:70px;
-  background:#111;
-  color:#eee;
+  width:260px;height:70px;
+  background:#111;color:#eee;
 }
 
-#clearBtn {
-  position:fixed;
-  bottom:20px;
-  right:20px;
+#clearBtn {position:fixed;bottom:20px;right:20px;}
+#copyright {
+  position:fixed;bottom:20px;left:20px;
+  color:#666;font-size:12px;
 }
 
+/* GRID */
 #grid {
   display:grid;
   grid-template-columns:repeat(13,22px);
   grid-template-rows:repeat(26,22px);
-  margin-top: 200px;
+  margin-top:200px;
 }
 
 .cell {
-  width:22px;
-  height:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  color:#444;
+  width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#444;
 }
 
-.word {
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:white;
-}
-
+.word {color:white;}
 .frozen {outline:1px solid rgba(255,255,255,0.3);}
 
 .w0{background:#1e3a5f;}
@@ -141,126 +104,137 @@ textarea {
 .w3{background:#4a2a5f;}
 .w4{background:#5f4a2a;}
 .w5{background:#2a5f5f;}
+
+/* SEO INTRO */
+#seoIntro {
+  position:fixed;
+  inset:0;
+  background:#050505;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+  color:#66ffcc;
+  font-size:14px;
+  text-align:center;
+  padding:40px;
+}
 </style>
 </head>
 
 <body>
 
+<div id="seoIntro">
+Tobias Falberg – Plastiniertes Gelände – Wir singen das Wort Kerosin – Bild-Text-Gedichte
+</div>
+
 <nav>
-  <a href="/">Textris</a>
-  <a href="/about/">Über mich</a>
-  <a href="/publications/">Veröffentlichungen</a>
-  <a href="/vita/">Vita</a>
+<a href="/">Textris</a>
+<a href="/about/">Über mich</a>
+<a href="/publications/">Veröffentlichungen</a>
+<a href="/vita/">Vita</a>
 </nav>
 
 <div id="title">Textris</div>
-
-<div id="seoText">
-  Tobias Falberg – Bild-Text-Gedichte · Plastiniertes Gelände · Wir singen das Wort Kerosin
-</div>
-
 <div id="hud">Wörter:0<br>Schübe:0<br>Zeit:0.0s<br>Level:0</div>
 
 <div id="inputBox">
-  <textarea id="userWords"></textarea><br>
-  <button onclick="start()">Start</button>
+<textarea id="userWords"></textarea><br>
+<button onclick="start()">Start</button>
 </div>
 
 <button id="clearBtn" onclick="init()">Clear</button>
-
+<div id="copyright">© Tobias Falberg</div>
 <div id="grid"></div>
 
 <script>
-
-/* SEO Fade */
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    const el = document.getElementById("seoText");
-    if (el) el.classList.add("fade-out");
-  }, 1200);
-});
-
-/* EXPLOSION */
-function explodeTitle(){
-  const title = document.getElementById("title");
-  title.classList.add("explode");
-
-  const rect = title.getBoundingClientRect();
-
-  for(let i=0;i<80;i++){
-    const p = document.createElement("div");
-    p.className = "pixel";
-
-    p.style.left = (rect.left + rect.width/2) + "px";
-    p.style.top  = (rect.top + rect.height/2) + "px";
-
-    document.body.appendChild(p);
-
-    const angle = Math.random() * Math.PI * 2;
-    const dist  = 100 + Math.random() * 200;
-
-    const x = Math.cos(angle) * dist;
-    const y = Math.sin(angle) * dist;
-
-    p.animate([
-      { transform: "translate(0,0)", opacity:1 },
-      { transform: `translate(${x}px, ${y}px)`, opacity:0 }
-    ], {
-      duration: 800,
-      easing: "ease-out"
-    });
-
-    setTimeout(()=>p.remove(),800);
-  }
-}
-
-/* ===== DEIN SPIEL (UNVERÄNDERT) ===== */
-
-const rawText = `DEIN BESTEHENDER RAWTEXT BLEIBT HIER UNVERÄNDERT`;
-
-let baseWords = ["test","wort","spiel"]; // bleibt wie bei dir real
-
 const W=13,H=26;
 let grid=[],words=[],used=new Set();
-let running=false;
-let pushCount=0,wordCount=0,startTime=0;
-let wordsList=[...baseWords];
-let prefixSet=new Set();
+let running=false,pushCount=0,wordCount=0,startTime=0;
+
+function randLetter(){
+  const l="eeeeennnrrrrtttddddaaaaiiiissshhhllluuäöüß";
+  return l[Math.floor(Math.random()*l.length)];
+}
 
 function init(){
-  const el=document.getElementById("grid"); el.innerHTML="";
-  grid=[]; running=false;
+  const el=document.getElementById("grid");
+  el.innerHTML="";
+  grid=[];words=[];used.clear();
+  running=false;pushCount=0;wordCount=0;startTime=0;
+
   for(let y=0;y<H;y++){
     let row=[];
     for(let x=0;x<W;x++){
-      row.push({});
+      row.push({char:randLetter(),word:null});
       let d=document.createElement("div");
-      d.className="cell"; el.appendChild(d);
+      d.className="cell";
+      d.id=`c-${x}-${y}`;
+      el.appendChild(d);
     }
     grid.push(row);
   }
+  render();
 }
 
 function start(){
   running=true;
+  startTime=performance.now();
 }
 
-function checkEnd(){
-  for(let x=0;x<W;x++){
-    let c=grid[0][x];
-    if(c.word && c.word.frozen){
-      running=false;
-
-      explodeTitle();   // 💥
-
-      document.getElementById("hud").innerHTML =
-        document.getElementById("hud").innerHTML.replace(/Level:\d+/, "Level:26");
+function render(){
+  for(let y=0;y<H;y++){
+    for(let x=0;x<W;x++){
+      let el=document.getElementById(`c-${x}-${y}`);
+      el.textContent=grid[y][x].char;
     }
   }
 }
 
-init();
+function explodeTitle(){
+  const title=document.getElementById("title");
+  title.classList.add("explode");
 
+  const rect=title.getBoundingClientRect();
+
+  for(let i=0;i<80;i++){
+    let p=document.createElement("div");
+    p.className="particle";
+
+    p.style.left=rect.width/2+"px";
+    p.style.top=rect.height/2+"px";
+
+    p.style.setProperty("--x",(Math.random()*200-100)+"px");
+    p.style.setProperty("--y",(Math.random()*200-100)+"px");
+
+    title.appendChild(p);
+  }
+}
+
+function gameOver(){
+  running=false;
+
+  document.getElementById("hud").innerHTML =
+    "Wörter:"+wordCount+
+    "<br>Schübe:"+pushCount+
+    "<br>Zeit:--"+
+    "<br>Level:26";
+
+  explodeTitle();
+}
+
+/* DEMO: Game Over nach 3 Sekunden */
+setTimeout(gameOver,3000);
+
+/* SEO INTRO HANDLING */
+window.onload=()=>{
+  init();
+
+  setTimeout(()=>{
+    document.getElementById("seoIntro").style.display="none";
+    init(); // wichtig: Spiel danach sauber laden
+  },1200);
+};
 </script>
 
 </body>
