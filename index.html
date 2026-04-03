@@ -52,15 +52,21 @@ nav a:hover {
   font-size:26px;
   margin:70px 0 10px 0; /* Platz für Navigation */
   transition:0.5s;
-  position: relative;
 }
 
-.pixel {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: red;
-  pointer-events: none;
+.explode {
+  color: red !important;
+  animation: explodeAnim 1s ease-out forwards;
+  font-weight: bold;
+  letter-spacing: 6px;
+}
+
+@keyframes explodeAnim {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.8); opacity: 1; }
+  50% { transform: scale(2); opacity: 0.9; }
+  70% { transform: scale(1.9); opacity: 1; }
+  100% { transform: scale(2); opacity: 1; }
 }
 
 #hud {
@@ -158,8 +164,7 @@ textarea {
 
   <!-- ================= SPIEL SCRIPT ================= -->
   <script>
-const rawText = `...`; // hier kommt dein langer Text aus Code 13
-
+const rawText = `... dein kompletter Text ...`; // wie in Code 13
 let baseWords = Array.from(new Set(
   rawText.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2)
 ));
@@ -176,7 +181,7 @@ function initAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.w
 function tone(f,d=0.1,v=0.05){ let o=audioCtx.createOscillator(); let g=audioCtx.createGain(); o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);}
 function beep(){tone(180,0.05,0.03);}
 function ding(){tone(700,0.12,0.05);}
-function finale(){explodeTitle();[400,500,650,450,560,700,520,660,800].forEach((f,i)=>setTimeout(()=>tone(f,0.2,0.05),i*120));}
+function finale(){[400,500,650,450,560,700,520,660,800].forEach((f,i)=>setTimeout(()=>tone(f,0.2,0.05),i*120));}
 
 function randLetter(){const l="eeeeennnrrrrtttddddaaaaiiiissshhhllluuäöüß"; return l[Math.floor(Math.random()*l.length)];}
 function rebuildPrefixes(){prefixSet.clear(); wordsList.forEach(w=>{for(let i=1;i<=w.length;i++){prefixSet.add(w.slice(0,i));}});}
@@ -184,8 +189,6 @@ function init(){
   const el=document.getElementById("grid"); el.innerHTML="";
   grid=[];words=[];used.clear(); running=false; pushCount=0; wordCount=0; startTime=0;
   document.getElementById("title").classList.remove("explode");
-  document.getElementById("title").style.fontSize="26px";
-  document.getElementById("title").style.color="#66ffcc";
   for(let y=0;y<H;y++){
     let row=[];
     for(let x=0;x<W;x++){
@@ -215,66 +218,17 @@ function check(x,y,dx,dy){let str="",pos=[];for(let i=0;i<10;i++){let cx=x+dx*i,
 
 function shouldFreeze(w){for(let [x,y] of w.positions){if(y===H-1) return true; let below=grid[y+1]?.[x]; if(below?.word && below.word.frozen) return true;} return false;}
 function move(){if(!running) return; pushCount++; updateHUD(); beep(); for(let w of words){if(w.frozen) continue; if(shouldFreeze(w)){w.frozen=true; ding(); continue;} w.positions.forEach(([x,y])=>{if(grid[y][x].word===w){grid[y][x]={char:randLetter(),word:null};}}); w.positions=w.positions.map(([x,y])=>[x,y+1]); w.positions.forEach(([x,y],i)=>{grid[y][x]={char:w.letters[i],word:w};});} checkEnd();}
-function checkEnd(){
-  let end=false;
-  for(let x=0;x<W;x++){
-    let c=grid[0][x];
-    if(c.word && c.word.frozen){
-      running=false;
-      end=true;
-    }
-  }
-  if(end){
-    document.getElementById("title").style.fontSize="60px";
-    document.getElementById("title").style.color="red";
-    explodeTitle();
-    // Level direkt auf Maximum setzen
-    document.getElementById("hud").innerHTML=document.getElementById("hud").innerHTML.replace(/Level:\d+/,"Level:26");
-    finale();
-  }
-}
+function checkEnd(){let gameOver=false; for(let x=0;x<W;x++){let c=grid[0][x]; if(c.word && c.word.frozen){gameOver=true; break;}} if(gameOver){
+  running=false;
+  document.getElementById("title").classList.add("explode");
+  document.getElementById("hud").innerHTML=document.getElementById("hud").innerHTML.replace(/Level:\d+/,'Level:26');
+  finale();
+}}
 function speed(){if(pushCount>=400) return 1000; if(pushCount>=300) return 2000; if(pushCount>=200) return 3000; if(pushCount>=100) return 4000; return 5000;}
 function scheduleMove(){if(!running) return; setTimeout(()=>{move(); scheduleMove();},speed());}
 function step(){if(!running) return; for(let y=0;y<H;y++){for(let x=0;x<W;x++){if(!grid[y][x].word && Math.random()<0.02){grid[y][x].char=randLetter();}}} scan(); updateHUD(); render();}
 function render(){for(let y=0;y<H;y++){for(let x=0;x<W;x++){let el=document.getElementById(`c-${x}-${y}`); let c=grid[y][x]; if(c.word){let w=c.word; el.innerHTML=`<div class="word w${w.id%6} ${w.frozen?"frozen":""}">${c.char}</div>`;}else{el.textContent=c.char;}}}}
-
-// =================== EXPLOSION ===================
-function explodeTitle(){
-  const title = document.getElementById("title");
-  const rect = title.getBoundingClientRect();
-  const centerX = rect.left + rect.width/2;
-  const centerY = rect.top + rect.height/2;
-  
-  for(let i=0;i<100;i++){
-    const px = document.createElement("div");
-    px.className="pixel";
-    document.body.appendChild(px);
-    px.style.left = centerX + "px";
-    px.style.top = centerY + "px";
-    
-    const angle = Math.random()*2*Math.PI;
-    const speed = 2+Math.random()*4;
-    const dx = Math.cos(angle)*speed;
-    const dy = Math.sin(angle)*speed;
-    
-    let life=0;
-    const maxLife = 50+Math.random()*30;
-    
-    function anim(){
-      life++;
-      px.style.left = (parseFloat(px.style.left)+dx) + "px";
-      px.style.top = (parseFloat(px.style.top)+dy) + "px";
-      px.style.opacity = (1-life/maxLife);
-      if(life<maxLife){
-        requestAnimationFrame(anim);
-      } else { px.remove(); }
-    }
-    anim();
-  }
-}
-
-setInterval(step,80); 
-init();
+setInterval(step,80); init();
 </script>
 </body>
 </html>
