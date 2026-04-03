@@ -5,4 +5,4 @@ permalink: /about/
 ---
 
 Tobias Falberg  
-[/)%?=)!§"&%/($] (file:///C:/Users/tobia/Downloads/Laudatio_Tobias_Falberg_2013.pdf)
+[/)%?=)!§"&%/($] (/assets/Laudatio_Tobias_Falberg_2013.pdf)
