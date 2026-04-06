@@ -4,6 +4,8 @@ title: Termine
 permalink: /termine/
 ---
 
+"Wir singen das Wort Kerosin"
+
 Mittagslesung, moderiert von Sabine Burkhardt
 
 Mittwoch, 22. April 2026
