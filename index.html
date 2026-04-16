@@ -166,6 +166,7 @@ textarea {
     <div>Textverwertung oder Start</div>
     <textarea id="userWords"></textarea><br>
     <button id="startBtn" onclick="start()">Start</button>
+    <div id="gameCounter">Durchläufe: 0</div>
   </div>
 
   <button id="clearBtn" onclick="init()">Clear</button>
@@ -257,7 +258,8 @@ let pushCount=0,wordCount=0,startTime=0;
 let wordsList=[...baseWords];
 let prefixSet=new Set();
 let audioCtx;
-
+let gameCount = 0;
+    
 function initAudio(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }}
 function tone(f,d=0.1,v=0.05){ let o=audioCtx.createOscillator(); let g=audioCtx.createGain(); o.frequency.value=f; g.gain.value=v; o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+d);}
 function beep(){tone(180,0.05,0.03);}
@@ -284,11 +286,6 @@ function init(){
 
 function start(){
   initAudio(); startTime = performance.now();
-
-  // Counter erhöhen
-  gameCount++;
-  document.getElementById("gameCounter").innerText = "Count: " + gameCount;
-  
   let input=document.getElementById("userWords").value;
   if(input.trim()){ let extra=input.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2);
     wordsList=[...baseWords,...extra];
