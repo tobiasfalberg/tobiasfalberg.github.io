@@ -284,6 +284,11 @@ function init(){
 
 function start(){
   initAudio(); startTime = performance.now();
+
+  // Counter erhöhen
+  gameCount++;
+  document.getElementById("gameCounter").innerText = "Count: " + gameCount;
+  
   let input=document.getElementById("userWords").value;
   if(input.trim()){ let extra=input.toLowerCase().replace(/[^a-zäöüß\s]/g," ").split(/\s+/).filter(w=>w.length>=2);
     wordsList=[...baseWords,...extra];
